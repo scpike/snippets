@@ -43,6 +43,7 @@
 
 (defn home-page []
   [:div [:h2 "Welcome to snippets"]
+   [:p [:a { :href "#/snippets/new" } "New snippet"]]
    [:ul
    (for [s @snippets]
      ^{:key (:name s)} [:li [:a { :href (str "#/" (:id s)) } (:name s)]])]
@@ -54,27 +55,62 @@
 
 (defn run-snippet
   [snippet s]
-  (let [code (:code snippet)
-        js-fn (js/eval code)]
-    (js-fn s)))
+  (try
+    (let [code (:code snippet)
+          js-fn (js/eval code)]
+      (js-fn s))
+    (catch js/Error e e)))
 
 (def input (atom ""))
 
+(defn snippet-widget
+  [snippet]
+  (let [output (run-snippet snippet @input)]
+    [:div
+     [:textarea {:rows 40 :cols 60
+                 :value @input
+                 :on-change #(reset! input (-> % .-target .-value))}]
+     [:span.buffer]
+     [:textarea {:rows 40 :cols 60 :value output :readOnly true }]
+     ]))
+
 (defn show-page [id]
   (fn []
-    (let [snippet (find-snippet id)
-          output (run-snippet snippet @input)]
-      [:div
-       [:h2 (:name snippet)]
-       [:div.main
-        [:textarea {:rows 40 :cols 60
-                    :value @input
-                    :on-change #(reset! input (-> % .-target .-value))}]
-        [:span.buffer]
-        [:textarea {:rows 40 :cols 60 :value output :readOnly true }]
-        ]
-        [:pre (:code snippet)]
-       [:div [:a {:href "#/"} "go to the home page"]]])))
+    (let [snippet (find-snippet id)]
+          [:div
+           [:h2 (:name snippet)]
+           [:div.main [snippet-widget snippet]]
+           [:pre (:code snippet)]
+           [:div [:a {:href "#/"} "go to the home page"]]])))
+
+(def new-snippet-state (atom {}))
+
+(defn create-snippet
+  []
+  (println @snippets)
+  (swap! snippets conj @new-snippet-state)
+  (println @snippets)
+  (reset! new-snippet-state (atom {}))
+  (session/put! :current-page #'home-page))
+
+(defn new-snippet []
+  [:div.new-snippet
+   [:h2 "New snippet"]
+   [:label "Name"
+    [:input { :on-change #(swap! new-snippet-state assoc :name (-> % .-target .-value)) }]]
+   [:label "Slug"
+    [:input { :on-change #(swap! new-snippet-state assoc :id (-> % .-target .-value)) }]]
+   [:label "Code"
+    [:textarea { :rows 40 :cols 60
+                :on-change #(swap! new-snippet-state assoc :code (-> % .-target .-value)) }]]
+   [:div.actions
+    [:button { :on-click create-snippet } "Submit"]]
+
+   [:div.preview
+    [snippet-widget @new-snippet-state]
+    ]
+   [:div [:a {:href "#/"} "go to the home page"]]
+   ])
 
 (defn current-page []
   [:div [(session/get :current-page)]])
@@ -91,6 +127,9 @@
 
 (secretary/defroute "/:id" [id]
   (session/put! :current-page (#'show-page id)))
+
+(secretary/defroute "/snippets/new" [id]
+  (session/put! :current-page #'new-snippet))
 
 ;; -------------------------
 ;; History

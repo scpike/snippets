@@ -36,3 +36,16 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.new-snippet button, .new-snippet input, .new-snippet textarea {
+    margin-bottom: 20px;
+}
+
+label span {
+    display: block;
+}
+
+button {
+    height: 30px;
+    min-width: 150px;
+}
