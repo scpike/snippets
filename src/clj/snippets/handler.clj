@@ -1,7 +1,12 @@
 (ns snippets.handler
-  (:require [compojure.core :refer [GET defroutes]]
+  (:require [compojure.core :refer [GET POST PUT DELETE defroutes]]
             [compojure.route :refer [not-found resources]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.defaults :refer [api-defaults wrap-defaults]]
+            [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.json :refer [wrap-json-response]]
+            [ring.util.response :refer [response]]
+            [clojure.string :as str]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [include-js include-css]]
             [prone.middleware :refer [wrap-exceptions]]
@@ -24,11 +29,98 @@
        " in order to start the compiler"]]
      (include-js "js/app.js")]]))
 
+(def snippets
+  (atom { 1 { :slug "echo" :name "echo" :code "(function(x) { return x })"}
+         2 { :slug "sort" :name "sort" :code "
+(function(x) {
+  return x.split(\"\\n\").sort().join(\"\\n\");
+})"}
+         3 { :slug "catsqlq" :name "catsqlq" :code "
+(function(x) {
+  if (x.length > 0) {
+    return \"('\" + x.split(\"\\n\").join(\"','\") + \"')\"
+  }
+})"}
+         4 { :slug "uniqify" :name "uniqify" :code "
+(function(x) {
+  var set = new Set();
+  var res = [];
+  x.split(\"\\n\").forEach(function(s) {
+    if (!set.has(s)) {
+      set.add(s);
+      res.push(s);
+    }
+  })
+  return res.sort().join(\"\\n\");
+})"}}))
+
+(defn snippets-index
+  []
+  (let [with-ids (map #(into {} (conj {:id (first %)} (second %))) @snippets)]
+    (response with-ids)))
+
+(defn find-snippet-idx
+  [id]
+  (first (first (filter
+                 #(= (:id (last %)) 10)
+                 (map-indexed vector @snippets)))))
+
+(defn snippets-show
+  [id]
+  (get @snippets 4))
+
+(defn conj-snippet
+  [snippets attrs]
+  (let [max-id (last (sort (keys snippets)))
+        new-id (if max-id (inc max-id) 1)]
+    (assoc snippets new-id attrs)))
+
+(defn valid-snippet?
+  [{:keys [slug name code] :as attrs}]
+  (and
+   (not (str/blank? slug))
+   (not (str/blank? code))
+   (not (str/blank? name))
+  ))
+
+(defn snippets-create
+  [attrs]
+  (println attrs)
+  (if (valid-snippet? attrs)
+    (do
+      (swap! snippets conj-snippet attrs)
+      (response "Ok"))
+    {:status 401 :body "Invalid" :headers {}}
+    ))
+
+(defn snippets-update
+  [{:keys [id] :as attrs}]
+  (println id)
+  (println attrs)
+  (let [id (Integer. id)]
+    (swap! snippets
+           #(update-in % [id] merge attrs))))
+
+(defn snippets-delete
+  [id]
+  (let [id (Integer. id)]
+    (swap! snippets #(dissoc % id))))
+
 (defroutes routes
   (GET "/" [] home-page)
+  (POST "/snippets" {params :params} (snippets-create params))
+  (GET "/snippets" [] (snippets-index))
+  (GET "/snippets/:id" [id] (snippets-show id))
+  (PUT "/snippets/:id" {params :params} (snippets-update params))
+  (DELETE "/snippets/:id" [id] (snippets-delete id))
   (resources "/")
   (not-found "Not Found"))
 
 (def app
-  (let [handler (wrap-defaults #'routes site-defaults)]
+  (let [handler
+        (-> #'routes
+            (wrap-defaults api-defaults)
+            wrap-keyword-params
+            wrap-params
+            wrap-json-response)]
     (if (env :dev) (-> handler wrap-exceptions wrap-reload) handler)))
