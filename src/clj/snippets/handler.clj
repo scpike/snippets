@@ -25,8 +25,8 @@
      [:div#nav
       [:ul
        [:li [:a {:href "#/"} "Snippets"]]]]
-     [:div#app
-      [:p "Loading..."]]
+     [:div#app]
+     [:div.footer [:a {:href "//scpike.com"} "scpike.com"]]
      (include-js "js/app.js")]]))
 
 (def snippets
@@ -43,7 +43,7 @@
 })"}
          4 { :slug "uniqify" :name "uniqify" :code "
 (function(x) {
-  var set = new Set();
+  var set = new Spet();
   var res = [];
   x.split(\"\\n\").forEach(function(s) {
     if (!set.has(s)) {

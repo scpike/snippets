@@ -23,10 +23,11 @@
       [:div [:label "Enter a gist url to create a snippet"
              [:input.gist-key {:name "gist-key"
                       :placeholder "https://gist.github.com/scpike/77f1c362b82750b53559"
-                      :on-change #(reset! gist-key (-> % .-target .-value))}
-              [:a {:href (str "#/gists/" (gists/parse-gist-key @gist-key))}
-               "Create snippet"]]]]]
-
+                               :on-change #(reset! gist-key (-> % .-target .-value))}]
+             (let [k @gist-key]
+               (if-not (clojure.string/blank? k)
+                 [:a {:href (str "#/gists/" (gists/parse-gist-key @gist-key))}
+                  "Create snippet"]))]]]
                                         ;[:p [:a {:href "#/snippets/new"} "Create a snippet"]]
      ]))
 
@@ -142,8 +143,3 @@
   (hook-browser-navigation!)
   (mount-root)
   (m/fetch))
-
-;; Quick and dirty history configuration.
-(let [h (History.)]
-  (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-  (doto h (.setEnabled true)))
