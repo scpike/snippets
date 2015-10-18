@@ -15,15 +15,21 @@
   []
   (.select (.getElementById js/document "results-input")))
 
+(defn find-and-select-input
+  []
+  (.select (.getElementById js/document "data-input")))
+
 (defn snippet-widget
   [snippet]
   (let [output (run-snippet snippet @input)]
     [:div
      [:div#input {:class "preview"}
       [:label "Paste your input here"
-       [:textarea {:rows 40
+       [:textarea#data-input {:rows 40
                    :value @input
-                   :on-change #(reset! input (-> % .-target .-value))}]]]
+                   :on-change #(reset! input (-> % .-target .-value))}]]
+      [:a {:on-click find-and-select-input} "Select all"]
+      ]
      [:div#output {:class "preview"}
       [:label [:span "Results"]
        [:textarea#results-input {:rows 40 :value output :readOnly true }]

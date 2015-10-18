@@ -43,7 +43,7 @@
 })"}
          4 { :slug "uniqify" :name "uniqify" :code "
 (function(x) {
-  var set = new Spet();
+  var set = new Set();
   var res = [];
   x.split(\"\\n\").forEach(function(s) {
     if (!set.has(s)) {
