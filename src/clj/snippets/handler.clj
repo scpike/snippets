@@ -22,11 +22,11 @@
              :content "width=device-width, initial-scale=1"}]
      (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
     [:body
+     [:div#nav
+      [:ul
+       [:li [:a {:href "#/"} "Snippets"]]]]
      [:div#app
-      [:h3 "ClojureScript has not been compiled!"]
-      [:p "please run "
-       [:b "lein figwheel"]
-       " in order to start the compiler"]]
+      [:p "Loading..."]]
      (include-js "js/app.js")]]))
 
 (def snippets
@@ -108,11 +108,11 @@
 
 (defroutes routes
   (GET "/" [] home-page)
-  (POST "/snippets" {params :params} (snippets-create params))
+;  (POST "/snippets" {params :params} (snippets-create params))
   (GET "/snippets" [] (snippets-index))
   (GET "/snippets/:id" [id] (snippets-show id))
-  (PUT "/snippets/:id" {params :params} (snippets-update params))
-  (DELETE "/snippets/:id" [id] (snippets-delete id))
+;  (PUT "/snippets/:id" {params :params} (snippets-update params))
+;  (DELETE "/snippets/:id" [id] (snippets-delete id))
   (resources "/")
   (not-found "Not Found"))
 

@@ -9,7 +9,6 @@
   []
   (GET "/snippets"
        {:handler #(do
-                    (println % )
                     (reset! snippets %))
         :response-format :json :keywords? true
         :error-handler #(js/alert "Could not fetch snippets")}))

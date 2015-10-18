@@ -6,68 +6,48 @@
               [cognitect.transit :as t]
               [ajax.core :refer [GET POST]]
               [snippets.model :as m :refer [snippets]]
+              [snippets.components :as c :refer [snippet-widget]]
+              [snippets.gists :as gists]
               [goog.history.EventType :as EventType])
     (:import goog.History))
 
-;; -------------------------
-;; Views
-
-;; TODO put these in a data store
-;;
-
+(def gist-key (atom ""))
 (defn home-page []
-  [:div [:h2 "Welcome to snippets"]
-   [:p [:a {:on-click #(secretary/dispatch! "/snippets/new")}  "New snippet"]]
-   [:ul
-   (for [s @m/snippets]
-     ^{:key (:name s)} [:li [:a { :href (str "#/" (:slug s)) } (:name s)]])]
-   ])
+  (m/fetch)
+  (fn []
+    [:div [:h2 "Choose a snippet"]
+     [:div.panel
+      [:ul
+       (for [s @m/snippets]
+         ^{:key (:name s)} [:li [:a { :href (str "#/" (:slug s)) } (:name s)]])]
+      [:div [:label "Enter a gist url to create a snippet"
+             [:input.gist-key {:name "gist-key"
+                      :placeholder "https://gist.github.com/scpike/77f1c362b82750b53559"
+                      :on-change #(reset! gist-key (-> % .-target .-value))}
+              [:a {:href (str "#/gists/" (gists/parse-gist-key @gist-key))}
+               "Create snippet"]]]]]
 
-(defn run-snippet
-  [snippet s]
-  (try
-    (let [code (:code snippet)
-          js-fn (js/eval code)]
-      (js-fn s))
-    (catch js/Error e e)))
-
-(def input (atom ""))
-
-(defn snippet-widget
-  [snippet]
-  (let [output (run-snippet snippet @input)]
-    [:div
-     [:textarea {:rows 40 :cols 60
-                 :value @input
-                 :on-change #(reset! input (-> % .-target .-value))}]
-     [:span.buffer]
-     [:textarea {:rows 40 :cols 60 :value output :readOnly true }]
+                                        ;[:p [:a {:href "#/snippets/new"} "Create a snippet"]]
      ]))
 
 (defn go-home
   []
-  (m/fetch)
-  (secretary/dispatch! "/"))
-
-(def edit-snippet-state (atom {}))
-(defn go-to-edit
-  [{:keys [slug] :as snippet}]
-  (reset! edit-snippet-state snippet)
-  (secretary/dispatch! (str "/snippets/" slug "/edit")))
+  (set! js/window.location.hash "/#"))
 
 (defn show-page [slug]
+  (reset! c/input "")
   (fn []
     (let [snippet (m/find-by-slug slug)]
           [:div
            [:h2 (:name snippet)]
            [:div.main [snippet-widget snippet]]
+           [:h3 "Code"]
            [:pre (:code snippet)]
            [:div
-            [:a {:on-click go-home :href "#/" }"go to the home page"]
             [:span " "]
-            [:a {:on-click #(m/delete snippet go-home)} "Delete"]
+          ;  [:a {:on-click #(m/delete snippet go-home)} "Delete"]
             [:span " "]
-            [:a {:on-click #(go-to-edit snippet)} "Edit"]
+;            [:a {:href (str "#/snippets/" slug "/edit")} "Edit"]
             ]])))
 
 (def new-snippet-state (atom {}))
@@ -88,35 +68,37 @@
                 :on-change #(swap! new-snippet-state assoc :code (-> % .-target .-value)) }]]
    [:div.actions
     [:button { :on-click create-snippet } "Submit"]]
-
-   [:div.preview
-    [snippet-widget @new-snippet-state]
-    ]
-   [:div [:a {:on-click go-home :href "#/"} "go to the home page"]]
+   [snippet-widget @new-snippet-state]
+   [:div [:a {:href "#/"} "Home page"]]
    ])
 
-(defn edit-snippet []
-  (let [snippet @edit-snippet-state]
-    [:div.edit-snippet
-     [:h2 (str "Edit snippet " (:name snippet))]
-     [:label "Name"
-      [:input {:on-change #(swap! edit-snippet-state assoc :name (-> % .-target .-value))
-               :value (:name snippet)}]]
-     [:label "Slug"
-      [:input {:on-change #(swap! edit-snippet-state assoc :slug (-> % .-target .-value))
-               :value (:slug snippet)}]]
-     [:label "Code"
-      [:textarea {:rows 40 :cols 60
-                  :on-change #(swap! edit-snippet-state assoc :code (-> % .-target .-value))
-                  :value (:code snippet)}]]
-     [:div.actions
-      [:button { :on-click #(m/save @edit-snippet-state go-home) } "Submit"]]
+(def edit-snippet-state (atom {}))
 
-     [:div.preview
-      [snippet-widget @edit-snippet-state]
-      ]
-     [:div [:a {:on-click go-home :href "#/"} "go to the home page"]]
-     ]))
+(defn edit-snippet [slug]
+  (let [snippet (m/find-by-slug slug)]
+    (reset! edit-snippet-state snippet))
+  (fn []
+    (let [snippet @edit-snippet-state]
+      [:div.edit-snippet
+       [:h2 (str "Edit snippet " (:name snippet))]
+       [:label "Name"
+        [:input {:on-change #(swap! edit-snippet-state assoc :name (-> % .-target .-value))
+                 :value (:name snippet)}]]
+       [:label "Slug"
+        [:input {:on-change #(swap! edit-snippet-state assoc :slug (-> % .-target .-value))
+                 :value (:slug snippet)}]]
+       [:label "Code"
+        [:textarea {:rows 40 :cols 60
+                    :on-change #(swap! edit-snippet-state assoc :code (-> % .-target .-value))
+                    :value (:code snippet)}]]
+       [:div.actions
+        [:button { :on-click #(m/save @edit-snippet-state go-home) } "Submit"]]
+
+       [:div.preview
+        [snippet-widget @edit-snippet-state]
+        ]
+       [:div [:a {:href "#/"} "Home page"]]
+       ])))
 
 (defn current-page []
   [:div [(session/get :current-page)]])
@@ -126,7 +108,7 @@
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
-  (session/put! :current-page #'home-page))
+  (session/put! :current-page (home-page)))
 
 (secretary/defroute "/:slug" [slug]
   (session/put! :current-page (#'show-page slug)))
@@ -135,7 +117,10 @@
   (session/put! :current-page #'new-snippet))
 
 (secretary/defroute "/snippets/:slug/edit" [slug]
-  (session/put! :current-page #'edit-snippet))
+  (session/put! :current-page (edit-snippet slug)))
+
+(secretary/defroute "/gists/:key" [key]
+  (session/put! :current-page (gists/show-page key)))
 
 ;; -------------------------
 ;; History
