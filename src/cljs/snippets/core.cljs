@@ -8,6 +8,7 @@
               [snippets.model :as m :refer [snippets]]
               [snippets.components :as c :refer [snippet-widget]]
               [snippets.gists :as gists]
+              [munge.core :as munge]
               [goog.history.EventType :as EventType])
     (:import goog.History))
 
@@ -110,6 +111,9 @@
 
 (secretary/defroute "/" []
   (session/put! :current-page (home-page)))
+
+(secretary/defroute "/munge" []
+  (session/put! :current-page #'munge/munge-home))
 
 (secretary/defroute "/:slug" [slug]
   (session/put! :current-page (#'show-page slug)))

@@ -20,6 +20,12 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
+     (include-js "//cdn.opalrb.org/opal/0.7.1/opal.min.js")
+     (include-js "//cdn.opalrb.org/opal/0.7.1/opal-parser.min.js")
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js")
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/mode/ruby/ruby.js")
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/keymap/emacs.js")
+     (include-css "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css")
      (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
     [:body
      [:div#nav
