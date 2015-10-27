@@ -3,12 +3,23 @@
 
 (def input (atom ""))
 
+(defn compile-ruby
+  [code]
+  (js/Opal.compile code))
+
+(defn compile-snippet
+  [{:keys [code lang]}]
+  (let [l (clojure.string.lower-case lang)]
+    (if (= l "ruby")
+      (compile-ruby code)
+      code)))
+
 (defn run-snippet
   [snippet s]
   (try
-    (let [code (:code snippet)
-          js-fn (js/eval code)]
-      (js-fn s))
+    (if-let [code (compile-snippet snippet)]
+      (let [js-fn (js/eval code)]
+        (js-fn s)))
     (catch js/Error e e)))
 
 (defn find-and-select-output
@@ -21,7 +32,7 @@
 
 (defn snippet-widget
   [snippet]
-  (let [output (run-snippet snippet @input)]
+  (let [output (str (run-snippet snippet @input))]
     [:div
      [:div#input {:class "preview"}
       [:label "Paste your input here"

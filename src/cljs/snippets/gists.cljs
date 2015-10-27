@@ -24,16 +24,17 @@
          {:handler #(do
                       (swap! gists assoc gist-key %))
           :response-format :json :keywords? true
-          :error-handler #(js/alert "Could not fetch gist")}))
+          :error-handler #(js/alert "Could not fetch gist")})))
 
-  (defn gist-contents
-    [{description :description url :html_url files :files {user :login} :owner}]
-    (let [{:keys [filename content]} (first (vals files))]
-      {:filename filename
-       :description description
-       :code content
-       :owner user
-       :url url})))
+(defn gist-contents
+  [{description :description url :html_url files :files {user :login} :owner}]
+  (let [{:keys [filename content language]} (first (vals files))]
+    {:filename filename
+     :description description
+     :code content
+     :lang language
+     :owner user
+     :url url}))
 
 (defn show-page [gist-key]
   (load-gist gist-key)

@@ -118,6 +118,10 @@ div.re-matches {
         height: 400px;
 }
 
+select {
+    margin-bottom: 20px;
+}
+
 .CodeMirror {
     margin-bottom: 20px;
     border-top: 1px solid #eee;
@@ -125,7 +129,7 @@ div.re-matches {
 }
 
 #munge-it .munge-btn {
-    font-size: 2em;
+    font-size: 1.1em;
     margin-bottom: 20px;
 }
 

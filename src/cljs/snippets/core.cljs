@@ -68,6 +68,10 @@
     [:input { :on-change #(swap! new-snippet-state assoc :name (-> % .-target .-value)) }]]
    [:label "Slug"
     [:input { :on-change #(swap! new-snippet-state assoc :slug (-> % .-target .-value)) }]]
+   [:label "Language"
+    [:select {:on-change #(swap! new-snippet-state assoc :lang (-> % .-target .-value)) }
+     [:option {:value "js"} "Javascript"]
+     [:option {:value "ruby"} "Ruby"]]]
    [:label "Code"
     [:textarea { :rows 40 :cols 60
                 :on-change #(swap! new-snippet-state assoc :code (-> % .-target .-value)) }]]

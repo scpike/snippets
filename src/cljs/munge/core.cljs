@@ -115,7 +115,7 @@ Portland, Oregon"))
      [:p "Write some ruby which defines a function `mapfn`."]
      map-code-input]]
    [:div
-    [:div [:input {:type "button" :value "Munge away!"
+    [:div [:input {:type "button" :value "Munge it"
                    :class "munge-btn"
                    :on-click do-munge}]]]
    [:div
