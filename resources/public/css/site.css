@@ -118,6 +118,17 @@ div.re-matches {
         height: 400px;
 }
 
+.CodeMirror {
+    margin-bottom: 20px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+#munge-it .munge-btn {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
 .new-snippet button, .new-snippet input, .new-snippet textarea {
         margin-bottom: 20px;
 }

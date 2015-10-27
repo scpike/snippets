@@ -9,6 +9,7 @@
               [snippets.components :as c :refer [snippet-widget]]
               [snippets.gists :as gists]
               [snippets.re-builder :as re-builder]
+              [munge.core :as munge]
               [goog.history.EventType :as EventType])
     (:import goog.History))
 
@@ -116,6 +117,9 @@
 
 (secretary/defroute "/re-builder" []
   (session/put! :current-page #'re-builder/show-page))
+
+(secretary/defroute "/munge" []
+  (session/put! :current-page #'munge/munge-home))
 
 (secretary/defroute "/:slug" [slug]
   (session/put! :current-page (#'show-page slug)))
