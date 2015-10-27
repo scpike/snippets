@@ -100,10 +100,22 @@ div#input {
         margin-bottom: 20px;
 }
 
+.thirds {
+        width: 30%
+}
+
 textarea {
         width: 95%;
         color: #2f4f4f;
         border: 1px dotted #2f4f4f;
+}
+
+div.re-matches {
+        width: 95%;
+        color: #2f4f4f;
+        border: 1px dotted #2f4f4f;
+        background-color: white;
+        height: 400px;
 }
 
 .new-snippet button, .new-snippet input, .new-snippet textarea {
@@ -123,7 +135,7 @@ input.gist-key {
         display: block;
         font-size: 1em;
         line-height: 1.3em;
-        min-width: 600px;
+        min-width: 50%;
 }
 
 .footer {

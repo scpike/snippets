@@ -5,6 +5,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-response]]
+            [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.util.response :refer [response]]
             [clojure.string :as str]
             [hiccup.core :refer [html]]
@@ -26,6 +27,7 @@
       [:ul
        [:li [:a {:href "#/"} "Snippets"]]]]
      [:div#app]
+     [:br]
      [:div.footer [:a {:href "//scpike.com"} "scpike.com"]]
      (include-js "js/app.js")]]))
 
@@ -122,5 +124,6 @@
             (wrap-defaults api-defaults)
             wrap-keyword-params
             wrap-params
-            wrap-json-response)]
+            wrap-json-response
+            wrap-gzip)]
     (if (env :dev) (-> handler wrap-exceptions wrap-reload) handler)))

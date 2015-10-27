@@ -8,6 +8,7 @@
               [snippets.model :as m :refer [snippets]]
               [snippets.components :as c :refer [snippet-widget]]
               [snippets.gists :as gists]
+              [snippets.re-builder :as re-builder]
               [goog.history.EventType :as EventType])
     (:import goog.History))
 
@@ -15,11 +16,13 @@
 (defn home-page []
   (m/fetch)
   (fn []
-    [:div [:h2 "Choose a snippet"]
+    [:div [:h2 ]
      [:div.panel
       [:ul
        (for [s @m/snippets]
-         ^{:key (:name s)} [:li [:a { :href (str "#/" (:slug s)) } (:name s)]])]
+         ^{:key (:name s)} [:li [:a { :href (str "#/" (:slug s)) } (:name s)]])
+       ; [:li ^{:key "re-builder"} [:a {:href "#/re-builder"} "re-builder"]]
+       ]
       [:div [:label "Enter a gist url to create a snippet"
              [:input.gist-key {:name "gist-key"
                       :placeholder "https://gist.github.com/scpike/77f1c362b82750b53559"
@@ -110,6 +113,9 @@
 
 (secretary/defroute "/" []
   (session/put! :current-page (home-page)))
+
+(secretary/defroute "/re-builder" []
+  (session/put! :current-page #'re-builder/show-page))
 
 (secretary/defroute "/:slug" [slug]
   (session/put! :current-page (#'show-page slug)))
