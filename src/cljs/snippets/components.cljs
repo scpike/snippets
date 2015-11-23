@@ -9,7 +9,7 @@
 
 (defn compile-snippet
   [{:keys [code lang]}]
-  (let [l (clojure.string.lower-case lang)]
+  (let [l (clojure.string.lower-case (str lang))]
     (if (= l "ruby")
       (compile-ruby code)
       code)))

@@ -10,6 +10,7 @@
               [snippets.gists :as gists]
               [snippets.re-builder :as re-builder]
               [munge.core :as munge]
+              [snippets.dedupe :as dedupe]
               [goog.history.EventType :as EventType])
     (:import goog.History))
 
@@ -22,7 +23,7 @@
       [:ul
        (for [s @m/snippets]
          ^{:key (:name s)} [:li [:a { :href (str "#/" (:slug s)) } (:name s)]])
-       ; [:li ^{:key "re-builder"} [:a {:href "#/re-builder"} "re-builder"]]
+       [:li ^{:key "dedupe"} [:a {:href "#/dedupe"} "dedupe"]]
        ]
       [:div [:label "Enter a gist url to create a snippet"
              [:input.gist-key {:name "gist-key"
@@ -124,6 +125,9 @@
 
 (secretary/defroute "/munge" []
   (session/put! :current-page #'munge/munge-home))
+
+(secretary/defroute "/dedupe" [key]
+  (session/put! :current-page #'dedupe/show-page))
 
 (secretary/defroute "/:slug" [slug]
   (session/put! :current-page (#'show-page slug)))

@@ -4,15 +4,19 @@
             [ring.middleware.defaults :refer [api-defaults wrap-defaults]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-            [ring.middleware.json :refer [wrap-json-response]]
+            [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.util.response :refer [response]]
             [clojure.string :as str]
+            [clojure.java.shell :refer [sh]]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [include-js include-css]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]
             [environ.core :refer [env]]))
+
+(def irrust (or (env :irrust-path)
+                "/home/steve/dev/information-retrieval/irrust/target/release/irrust"))
 
 (def home-page
   (html
@@ -21,8 +25,8 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
-     (include-js "//cdn.opalrb.org/opal/0.7.1/opal.min.js")
-     (include-js "//cdn.opalrb.org/opal/0.7.1/opal-parser.min.js")
+     [:script {:src "//cdn.opalrb.org/opal/0.7.1/opal.min.js" :type "text/javascript"}]
+     [:script {:src "//cdn.opalrb.org/opal/0.7.1/opal-parser.min.js" :type "text/javascript" :async "true"}]
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js")
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/mode/ruby/ruby.js")
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/keymap/emacs.js")
@@ -114,11 +118,27 @@
   (let [id (Integer. id)]
     (swap! snippets #(dissoc % id))))
 
+(defn sanitize-lines
+  [xs]
+  (str/join "\n" (take 10000 (str/split (str  xs) #"\n"))))
+
+(defn run-deduper
+  [xs]
+  (let [lines (sanitize-lines xs)
+        scores (:out (sh irrust :in lines))]
+    (str/join "\n" (reverse (sort (str/split scores #"\n"))))))
+
+(defn dedupe-handler
+  [lines]
+  (response {:results (run-deduper lines)}))
+
 (defroutes routes
   (GET "/" [] home-page)
 ;  (POST "/snippets" {params :params} (snippets-create params))
   (GET "/snippets" [] (snippets-index))
   (GET "/snippets/:id" [id] (snippets-show id))
+  (PUT "/dedupe" request (dedupe-handler (get-in request [:body :lines])))
+
 ;  (PUT "/snippets/:id" {params :params} (snippets-update params))
 ;  (DELETE "/snippets/:id" [id] (snippets-delete id))
   (resources "/")
@@ -131,5 +151,6 @@
             wrap-keyword-params
             wrap-params
             wrap-json-response
+            (wrap-json-body {:keywords? true})
             wrap-gzip)]
     (if (env :dev) (-> handler wrap-exceptions wrap-reload) handler)))
