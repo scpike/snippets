@@ -1,0 +1,8 @@
+* Up next
+** TODO Load snippets from a postgres DB
+* Ideas
+** User login & roles
+   + Github based auth for public login
+   + Read your list of gists?
+** Web snippet management
+** Fix delay caused by Opal.rb loading

@@ -20,6 +20,11 @@
                  [hiccup "1.0.5"]
                  [environ "1.0.1"]
                  [org.clojure/clojurescript "1.7.122" :scope "provided"]
+                 [org.clojure/java.jdbc "0.4.2"]
+                 [org.postgresql/postgresql "9.4-1201-jdbc41"]
+                 [migratus "0.8.13"]
+                 [mount "0.1.10"]
+                 [conman "0.4.6"]
                  [secretary "1.2.3"]]
 
   :plugins [[lein-environ "1.0.1"]
@@ -33,6 +38,14 @@
   :uberjar-name "snippets.jar"
 
   :main snippets.server
+
+  :migratus {:store :database
+             :migration-dir "migrations"
+             :db {:dbtype "postgresql"
+                  :dbname "snippets"
+                  :port "5433"
+                  :user "snippets"
+                  :password "snippets"}}
 
   :clean-targets ^{:protect false} [:target-path
                                     [:cljsbuild :builds :app :compiler :output-dir]
@@ -62,6 +75,7 @@
                    :source-paths ["env/dev/clj"]
                    :plugins [[lein-figwheel "0.4.0"]
                              [lein-cljsbuild "1.0.6"]
+                             [migratus-lein "0.2.6"]
                              [com.cemerick/clojurescript.test "0.3.3"]]
 
                    :injections [(require 'pjstadig.humane-test-output)
