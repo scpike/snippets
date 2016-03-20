@@ -33,12 +33,12 @@
                (if-not (clojure.string/blank? k)
                  [:a {:href (str "#/gists/" (gists/parse-gist-key @gist-key))}
                   "Create snippet"]))]]]
-                                        ;[:p [:a {:href "#/snippets/new"} "Create a snippet"]]
+     [:p [:a {:href "#/snippets/new"} "Create a snippet"]]
      ]))
 
 (defn go-home
   []
-  (set! js/window.location.hash "/#"))
+  (secretary/dispatch! "/"))
 
 (defn show-page [slug]
   (reset! c/input "")
@@ -51,9 +51,9 @@
            [:pre (:code snippet)]
            [:div
             [:span " "]
-          ;  [:a {:on-click #(m/delete snippet go-home)} "Delete"]
+            [:a {:on-click #(m/delete snippet go-home)} "Delete"]
             [:span " "]
-;            [:a {:href (str "#/snippets/" slug "/edit")} "Edit"]
+            [:a {:href (str "#/snippets/" slug "/edit")} "Edit"]
             ]])))
 
 (def new-snippet-state (atom {}))

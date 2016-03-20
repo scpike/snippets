@@ -15,7 +15,3 @@
           :stop (conman/disconnect! *db*))
 
 (conman/bind-connection *db* "sql/queries.sql")
-
-(defn insert-snippet
-  [attrs]
-  true)

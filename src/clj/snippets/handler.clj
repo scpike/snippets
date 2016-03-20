@@ -73,16 +73,16 @@
 
 (defn snippets-update
   [{:keys [id] :as attrs}]
-  (println id)
-  (println attrs)
-  (let [id (Integer. id)]
-    (swap! snippets
-           #(update-in % [id] merge attrs))))
+  (let [id (Integer. id)
+        attrs (assoc attrs :id id)]
+    (db/update-snippet attrs)
+    (response "Ok")))
 
 (defn snippets-delete
   [id]
   (let [id (Integer. id)]
-    (swap! snippets #(dissoc % id))))
+    (db/delete-snippet {:id id})
+    (response "Ok")))
 
 (defn sanitize-lines
   [xs]
@@ -100,13 +100,12 @@
 
 (defroutes routes
   (GET "/" [] home-page)
-;  (POST "/snippets" {params :params} (snippets-create params))
+  (POST "/snippets" {params :params} (snippets-create params))
   (GET "/snippets" [] (snippets-index))
   (GET "/snippets/:id" [id] (snippets-show id))
   (PUT "/dedupe" request (dedupe-handler (get-in request [:body :lines])))
-
-;  (PUT "/snippets/:id" {params :params} (snippets-update params))
-;  (DELETE "/snippets/:id" [id] (snippets-delete id))
+  (PUT "/snippets/:id" {params :params} (snippets-update params))
+  (DELETE "/snippets/:id" [id] (snippets-delete id))
   (resources "/")
   (not-found "Not Found"))
 
