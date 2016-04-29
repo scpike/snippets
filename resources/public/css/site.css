@@ -164,3 +164,24 @@ input.gist-key {
         text-decoration: underline;
         margin-bottom: 100px;
 }
+
+
+table.addr-results {
+//  width: 100%;
+}
+
+table.addr-results th.addr-input {
+  width: 350px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+table.addr-results th {
+  text-align: left;
+}
+
+table.addr-results td, table.addr-results th {
+  padding-right: 20px;
+}
+

@@ -8,7 +8,7 @@
    :min-idle   1
    :max-idle   4
    :max-active 32
-   :jdbc-url "jdbc:postgresql://localhost:5433/snippets?user=snippets&password=snippets"})
+   :jdbc-url "jdbc:postgresql://localhost:5432/snippets?user=snippets&password=snippets"})
 
 (defstate ^:dynamic *db*
           :start (conman/connect! pool-spec)

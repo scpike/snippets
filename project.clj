@@ -25,6 +25,7 @@
                  [migratus "0.8.13"]
                  [mount "0.1.10"]
                  [conman "0.4.6"]
+                 [frankiesardo/linked "1.2.6"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.slf4j/slf4j-log4j12 "1.7.19"]
                  [log4j/log4j "1.2.17" :exclusions [javax.mail/mail
@@ -49,7 +50,7 @@
              :migration-dir "migrations"
              :db {:dbtype "postgresql"
                   :dbname "snippets"
-                  :port "5433"
+                  :port "5432"
                   :user "snippets"
                   :password "snippets"}}
 
