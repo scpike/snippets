@@ -48,11 +48,7 @@
 
   :migratus {:store :database
              :migration-dir "migrations"
-             :db {:dbtype "postgresql"
-                  :dbname "snippets"
-                  :port "5432"
-                  :user "snippets"
-                  :password "snippets"}}
+             :db ~(get (System/getenv) "DATABASE_URL")}
 
   :clean-targets ^{:protect false} [:target-path
                                     [:cljsbuild :builds :app :compiler :output-dir]
