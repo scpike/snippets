@@ -114,4 +114,5 @@
                                              {:source-paths ["env/prod/cljs"]
                                               :compiler
                                               {:optimizations :advanced
+                                               :closure-defines {snippets.addr/addr-parser-url "https://addrparse.scpike.com/parse_multi"}
                                                :pretty-print false}}}}}})

@@ -6,7 +6,7 @@
               [snippets.components :as c])
     (:import goog.History))
 
-(def addr-parser-url "//localhost:8080/parse_multi")
+(goog-define addr-parser-url "//localhost:8080/parse_multi")
 
 (defonce output (atom []))
 (defonce raw-output (atom []))

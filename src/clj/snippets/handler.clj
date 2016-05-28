@@ -27,8 +27,9 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
-     [:script {:src "//cdn.opalrb.org/opal/0.7.1/opal.min.js" :type "text/javascript"}]
-     [:script {:src "//cdn.opalrb.org/opal/0.7.1/opal-parser.min.js" :type "text/javascript" :async "true"}]
+     [:script {:src "js-libs/opal.min.js" :type "text/javascript"}]
+     [:script {:src "js-libs/native.min.js" :type "text/javascript"}]
+     [:script {:src "js-libs/opal-parser.min.js" :type "text/javascript"}]
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js")
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/mode/ruby/ruby.js")
      (include-js "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/keymap/emacs.js")
@@ -67,7 +68,7 @@
   [attrs]
   (if (valid-snippet? attrs)
     (do
-      (db/insert-snippet attrs)
+      ; (db/insert-snippet attrs)
       (response "Ok"))
     {:status 401 :body "Invalid" :headers {}}))
 
@@ -75,13 +76,13 @@
   [{:keys [id] :as attrs}]
   (let [id (Integer. id)
         attrs (assoc attrs :id id)]
-    (db/update-snippet attrs)
+    ; (db/update-snippet attrs)
     (response "Ok")))
 
 (defn snippets-delete
   [id]
   (let [id (Integer. id)]
-    (db/delete-snippet {:id id})
+    ; (db/delete-snippet {:id id})
     (response "Ok")))
 
 (defn sanitize-lines
