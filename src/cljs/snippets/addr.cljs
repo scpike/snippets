@@ -9,6 +9,8 @@
 (def addr-parser-url "//localhost:8080/parse_multi")
 
 (defonce output (atom []))
+(defonce raw-output (atom []))
+(def show-raw (atom false))
 (def input (atom "112 Highview Road, Milford PA 18337
 319 Avenue C, Apt. 10A NEw York NY 10009"))
 
@@ -18,6 +20,7 @@
 
 (defn handle-new-addresses
   [res]
+  (reset! raw-output res)
   (reset! output
           (map (fn [x] {:input (:Input x)
                         :result (result->map (:Result x))})
@@ -50,6 +53,10 @@
        (map string/capitalize)
        string/join))
 
+(defn format-state
+  [s]
+  (if (= 2 (count s)) (upper-case s) (capitalize-words s)))
+
 (def formatters 
   (linked/map :house upper-case
               :house_number upper-case
@@ -57,7 +64,7 @@
               :suburb capitalize-words
               :city_district capitalize-words
               :city capitalize-words
-              :state upper-case
+              :state format-state
               :state_district capitalize-words
               :postcode str
               :country capitalize-words))
@@ -78,33 +85,53 @@
   (let [all-keys (into (linked/set) (flatten (map keys results)))]
     (filter #(contains? all-keys %) ordered-header-options)))
 
+(defn result-toggler
+  []
+  [:a.small {:on-click #(swap! show-raw not)} (if @show-raw "view table" "view raw") ])
+
 (defn result-table
   [output]
   (let [ks (headers (map :result output))]
-    (println ks)
-    [:table.addr-results
-     [:thead
-      ^{:key "header"} [:tr
-                        [:th.addr-input "Input"]
-                        (doall
-                         (map-indexed (fn [n x]
-                                        ^{:key n} [:th.addr-hdr (str x)])
-                                      ks
-                                      ))]]
-     [:tbody
-      (doall 
-       (map-indexed (fn [n {:keys [input result]}]
-                      ^{:key n}
-                      [:tr
-                       [:td input]
-                       (doall
-                        (map-indexed (fn [j k]
-                                       ^{:key j} [:td.addr-hdr (get (format-result result) k)])
-                                     ks
-                                     ))
-                       ])
-                    output
-                    ))]]))
+  [:table.addr-results
+   [:thead
+    ^{:key "header"} [:tr
+                      [:th.addr-input "input"]
+                      (doall
+                       (map-indexed (fn [n x]
+                                      ^{:key n} [:th.addr-hdr (name x)])
+                                    ks
+                                    ))]]
+   [:tbody
+    (doall 
+     (map-indexed (fn [n {:keys [input result]}]
+                    ^{:key n}
+                    [:tr
+                     [:td input]
+                     (doall
+                      (map-indexed (fn [j k]
+                                     ^{:key j} [:td.addr-hdr (get (format-result result) k)])
+                                   ks
+                                   ))
+                     ])
+                  output
+                  ))]]))
+
+(defn raw-results
+  [output]
+  [:pre
+   (str "[\n" (string/join ",\n" (map #(.stringify js/JSON (clj->js %)) output))
+        "\n]"
+        )
+   
+   ])
+
+(defn results
+  [raw-output output]
+    [:div.addr-results
+     [:span "Results"] [:span " "] [result-toggler]
+     (if @show-raw
+       [raw-results raw-output]
+       [result-table output])])
 
 (defn show-page []
   (fn []
@@ -112,12 +139,10 @@
      [:h2 "expand some addresses"]
      [:p [:button {:on-click send-addr} "Run"]]
      [:div
-      [:div 
+      [:div.row
        [:label "Paste your input here"
-        [:textarea#data-input {:rows 40 :value @input
+        [:textarea#data-input {:rows 30 :value @input
                                :on-change #(reset! input (-> % .-target .-value))}]]]
       [:div#output
-       [:br]
-       [:label [:span "Results"]]
-       [result-table @output]
+       (if (seq @output) [results @raw-output @output])
        ]]]))
